@@ -11,8 +11,8 @@
   DTS:LocaleID="1060"
   DTS:ObjectName="Final preparation"
   DTS:PackageType="5"
-  DTS:VersionBuild="1"
-  DTS:VersionGUID="{AA719CB6-289E-454A-BC41-2F3234400203}">
+  DTS:VersionBuild="2"
+  DTS:VersionGUID="{CFDA7826-AF2D-448A-8569-66CFF2CB1FF1}">
   <DTS:Property
     DTS:Name="PackageFormatVersion">8</DTS:Property>
   <DTS:ConnectionManagers>

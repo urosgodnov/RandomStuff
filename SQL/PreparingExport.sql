@@ -65,6 +65,9 @@ go
 ALTER TABLE import.TestAll
 ADD Notes nvarchar(4000)
 GO
+CREATE CLUSTERED INDEX IX_TestTable_TestCol1   
+    ON import.TestAll ([RecordIDW],[SequenceD]); 
+GO
 UPDATE import.TestAll
 SET Notes=REPLACE(REPLACE([Join ALL steps], CHAR(13), ''), CHAR(10), ''),
     SequenceD=n.[Sequence updates in WebTMs]
@@ -83,16 +86,20 @@ DROP VIEW IF EXISTS dbo.MondelezExport
 GO
 CREATE VIEW dbo.MondelezExport
 AS
-SELECT TOP (100) PERCENT t.[RecordIDW] as [Record_ID], t.CountryW as Country, t.OwnerNameWebTMSChecked as OwnerName,
-t.OwnerAddressWebTMSChecked as OwnerAddress, t.SequenceD, t.Notes as Note
+SELECT TOP (100) PERCENT b.[RecordIDW] as [Record_ID], b.Country, b.OwnerName,
+b.OwnerAddress, b.SequenceD, b.Notes as Note,
+NTILE(1) OVER (ORDER BY b.SequenceD, b.[RecordIDW]) AS Batch
+FROM 
+(SELECT DISTINCT [RecordIDW],a.Country,a.OwnerName,a.OwnerAddress,a.Notes,a.sequenced
 FROM import.TestAll as t
+CROSS APPLY [dbo].[HighestSequence](t.[RecordIDW]) a
 WHERE not exists (SELECT a.* FROM
 (SELECT [RecordIDW],[ProjectRec],[Task]
 FROM [import].[TestAll]
 GROUP BY [RecordIDW],[ProjectRec],[Task]
 HAVING count(*)>1) as a WHERE t.RecordIDW=a.RecordIDW and t.ProjectRec=a.ProjectRec and t.Task=a.Task)
-and t.SequenceD is not null
-ORDER BY t.SequenceD,[Record_ID]
+and t.SequenceD is not null and [columnJoin] in ('S','R','A')) as b
+
 
 
 
