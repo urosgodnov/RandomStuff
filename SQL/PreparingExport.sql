@@ -28,7 +28,7 @@ FROM
 	   Designs,
 	   [rowNumRec] as RowNumberRec
 FROM [dbo].[SolidMatch]
-WHERE [Designs] IS NULL and (WorkStatusID in (1,5) or WorkStatusID is null)
+WHERE [Designs] IS NULL and (WorkStatusID in (1,5,11,10) or WorkStatusID is null)
 UNION ALL
 SELECT [RECORIDW]AS [RecordIDW],
        [Subsystem Ref] as [SubSysRefRec],
@@ -60,7 +60,7 @@ WHERE [_Matched] in ('''Matched''')and [ActiveW]=1 and designs is null and
 --inner join [dbo].[Notes] as n on n.Project=a.ProjectRec and n.[Task ID]=a.Task
 inner join [dbo].[WEBTMSALL] as w on w.[RECORD ID]=a.[RecordIDW]
 --left  join [dbo].[tmpNotes] as tmp on a.RowNumberRec=tmp.[RowNumberRec]
-where (a.WorkStatusID in (1,5) or a.WorkStatusID is null) and a.Designs is null
+where a.Designs is null and (a.WorkStatusID in (1,5,11,10) or a.WorkStatusID is null) 
 go
 ALTER TABLE import.TestAll
 ADD Notes nvarchar(4000)
@@ -96,9 +96,13 @@ CROSS APPLY [dbo].[HighestSequence](t.[RecordIDW]) a
 WHERE not exists (SELECT a.* FROM
 (SELECT [RecordIDW],[ProjectRec],[Task]
 FROM [import].[TestAll]
+--WHERE (WorkStatusID in (1,5,10,11) or WorkStatusID is null)
 GROUP BY [RecordIDW],[ProjectRec],[Task]
 HAVING count(*)>1) as a WHERE t.RecordIDW=a.RecordIDW and t.ProjectRec=a.ProjectRec and t.Task=a.Task)
-and t.SequenceD is not null and [columnJoin] in ('S','R','A')) as b
+and t.SequenceD is not null and columnJoin in ('G','RC','AC','S','R','A')
+and (t.WorkStatusID in (1,5,10,11) or t.WorkStatusID is null)) as b
+
+
 
 
 
